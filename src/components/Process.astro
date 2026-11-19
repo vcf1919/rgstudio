@@ -1,0 +1,24 @@
+---
+import Label from './Label.astro';
+import ProcessCard from './ProcessCard.astro';
+import { getProcess } from '../lib/content';
+const steps = await getProcess();
+---
+<section class="process" data-stack aria-labelledby="proceso-t">
+  <Label left="(02) Proceso" right={`${steps.length} pasos`} />
+  <h2 class="sr" id="proceso-t">Proceso</h2>
+  {steps.map((s, i) => <ProcessCard step={s} i={i} total={steps.length} />)}
+</section>
+
+<style>
+  .process{padding:0 var(--pad) 12vh}
+</style>
+
+<script>
+  import { onPage } from '../lib/lifecycle';
+  import { init } from '../effects/stack-cards';
+  onPage((doc) => {
+    const el = doc.querySelector<HTMLElement>('[data-stack]');
+    if (el) return init(el).destroy;
+  });
+</script>

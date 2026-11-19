@@ -1,0 +1,17 @@
+---
+import { site, whatsappUrl } from '../lib/site';
+const year = new Date().getFullYear();
+---
+<footer class="mono">
+  <span>© {year} {site.brand} · {site.location}</span>
+  <nav aria-label="Contacto">
+    <a href={whatsappUrl} target="_blank" rel="noopener">WhatsApp</a>
+    <a href={`mailto:${site.email}`}>Email</a>
+    <a href={site.instagram.url} target="_blank" rel="noopener">Instagram</a>
+  </nav>
+</footer>
+<style>
+  footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:18px var(--pad);border-top:1px solid var(--line);color:var(--mute)}
+  nav{display:flex;gap:18px}
+  a:hover{color:var(--ink)}
+</style>

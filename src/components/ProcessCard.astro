@@ -1,0 +1,74 @@
+---
+import type { CollectionEntry } from 'astro:content';
+interface Props { step: CollectionEntry<'process'>; i: number; total: number }
+const { step, i, total } = Astro.props;
+const d = step.data;
+const pad = (n: number) => String(n).padStart(2, '0');
+const codeBars = [
+  { w: 62, m: 0 }, { w: 84, m: 8 }, { w: 48, m: 8 }, { w: 70, m: 16 }, { w: 36, m: 0 },
+];
+---
+<article class:list={['card', `t-${d.theme}`]} data-card style={`--i:${i}`} aria-labelledby={`step-${step.id}`}>
+  <div class="top mono"><span>{pad(i + 1)} / {pad(total)}</span><span>{d.week}</span></div>
+  <div class="vis" aria-hidden="true">
+    {d.visual === 'wireframe' && (
+      <svg class="wire" viewBox="0 0 400 300" preserveAspectRatio="none"><rect x="1" y="1" width="398" height="298" rx="10" pathLength="1"/><line x1="0" y1="0" x2="400" y2="300" pathLength="1"/><line x1="400" y1="0" x2="0" y2="300" pathLength="1"/><rect class="t" x="30" y="220" width="130" height="44" rx="22" pathLength="1"/></svg>
+    )}
+    {d.visual === 'swatches' && (
+      <div class="sw">{(d.swatches ?? []).map((hex) => {
+        const n = parseInt(hex, 16), lum = ((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000;
+        return <i style={`background:#${hex};color:${lum < 110 ? '#ccc' : '#111'}`}>{hex.toUpperCase()}</i>;
+      })}</div>
+    )}
+    {d.visual === 'code' && (
+      <div class="code">{codeBars.map((b) => <i style={`width:${b.w}%${b.m ? `;margin-left:${b.m}%` : ''}`}></i>)}</div>
+    )}
+    {d.visual === 'live' && (
+      <div class="live"><b></b><span>{d.liveDomain}</span></div>
+    )}
+  </div>
+  <div class="bot">
+    <h3 class="d" id={`step-${step.id}`}><span class="ri"><span>{d.title}</span></span></h3>
+    <p>{d.description}</p>
+  </div>
+</article>
+
+<style>
+  .card{position:sticky;top:calc(var(--pad) + var(--i) * 18px);height:min(78svh,720px);margin-bottom:4vh;border-radius:22px;overflow:hidden;
+    display:grid;grid-template-rows:auto 1fr auto;padding:clamp(20px,3vw,40px);transform-origin:50% 0;will-change:transform}
+  .top{display:flex;justify-content:space-between}
+  h3{font-size:clamp(64px,13vw,210px);line-height:.85}
+  .bot{display:grid;grid-template-columns:1fr;gap:18px;align-items:end}
+  @media(min-width:860px){.bot{grid-template-columns:1.4fr 1fr}}
+  p{font-size:clamp(15px,1.4vw,19px);line-height:1.45;max-width:34ch}
+  .vis{align-self:center;justify-self:end;width:min(46%,420px);aspect-ratio:4/3;position:relative}
+  @media(max-width:859px){.vis{width:72%;justify-self:start}}
+  .t-sand{background:#E4E0D8} .t-ink{background:#111110;color:#F1EFEA} .t-accent{background:var(--acc);color:#111110} .t-paper{background:#FBFAF7;border:1px solid var(--line)}
+  .t-ink .mono,.t-ink p{color:#A29E95}
+  /* visuals animate when the card is active */
+  .wire{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .wire *{fill:none;stroke:#8F8A80;stroke-width:1;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.4s var(--ease)}
+  .wire .t{stroke:var(--acc)}
+  .card:global(.on) .wire *{stroke-dashoffset:0}
+  .card:global(.on) .wire line:nth-of-type(1){transition-delay:.5s}.card:global(.on) .wire line:nth-of-type(2){transition-delay:.7s}.card:global(.on) .wire .t{transition-delay:1s}
+  .sw{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .sw i{border-radius:10px;display:grid;align-items:end;padding:10px;font:10px var(--mono);font-style:normal;transform:translateY(30%) scale(.85);opacity:0;transition:transform .9s var(--ease),opacity .6s}
+  .card:global(.on) .sw i{transform:none;opacity:1}
+  .sw i:nth-child(2){transition-delay:.1s}.sw i:nth-child(3){transition-delay:.2s}.sw i:nth-child(4){transition-delay:.3s}
+  .code{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:12px}
+  .code i{display:block;height:12px;border-radius:6px;background:#111110;transform-origin:left;transform:scaleX(0);transition:transform .8s var(--ease)}
+  .card:global(.on) .code i{transform:none}
+  .code i:nth-child(2){transition-delay:.15s}.code i:nth-child(3){transition-delay:.3s}.code i:nth-child(4){transition-delay:.45s}.code i:nth-child(5){transition-delay:.6s}
+  .live{position:absolute;inset:0;display:grid;place-items:center}
+  .live b{width:46%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#FFB08F 40%,#FF4D12 75%,#B02F05);
+    box-shadow:0 30px 80px -10px rgba(255,77,18,.5);transform:scale(0);transition:transform 1.2s cubic-bezier(.34,1.56,.64,1)}
+  .card:global(.on) .live b{transform:scale(1);animation:float 5s ease-in-out 1.2s infinite}
+  @keyframes float{50%{transform:translateY(-12px)}}
+  .live span{position:absolute;bottom:0;left:0;font:11px var(--mono);color:var(--mute)}
+  .live span::before{content:"● ";color:#2DBE6C}
+  @media (prefers-reduced-motion:reduce){
+    .wire *{stroke-dashoffset:0;transition:none}
+    .sw i,.code i,.live b{transform:none;opacity:1;transition:none}
+    .card:global(.on) .live b{animation:none}
+  }
+</style>

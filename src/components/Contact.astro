@@ -1,0 +1,41 @@
+---
+import { site, whatsappUrl } from '../lib/site';
+const { contact } = site;
+---
+<section class="cta" id="contacto" data-cursor="glass" data-lines={JSON.stringify(contact.lines)} data-label={contact.label} aria-labelledby="contacto-t">
+  <h2 class="sr" id="contacto-t">{contact.h2}</h2>
+  <canvas class="glcv" aria-hidden="true"></canvas>
+  <span class="corner tl mono">(04) Contacto</span>
+  <span class="corner tr mono">{contact.note}</span>
+  <a class="mag" data-magnetic href={whatsappUrl} target="_blank" rel="noopener" aria-label={`Escríbeme por ${contact.button}`}><span>{contact.button}</span></a>
+  <p class="links mono">
+    <a href={`mailto:${site.email}`}>{site.email}</a>
+    <a href={site.instagram.url} target="_blank" rel="noopener">{site.instagram.handle}</a>
+  </p>
+</section>
+
+<style>
+  .cta{position:relative;height:100svh;min-height:560px;overflow:hidden;touch-action:pan-y}
+  .corner{position:absolute;z-index:2;color:var(--mute)}
+  .tl{top:var(--pad);left:var(--pad)} .tr{top:var(--pad);right:var(--pad)}
+  .mag{position:absolute;left:50%;bottom:clamp(64px,12vh,120px);margin-left:-75px;z-index:3;display:grid;place-items:center;width:150px;height:150px;border-radius:50%;
+    background:var(--ink);color:var(--bg);font-size:15px;font-weight:500;transition:transform .55s var(--ease),background .4s}
+  .mag:hover{background:var(--acc)}
+  .mag span{transition:transform .55s var(--ease);pointer-events:none}
+  .links{position:absolute;z-index:3;left:0;right:0;bottom:var(--pad);display:flex;justify-content:center;gap:20px;flex-wrap:wrap;color:var(--mute);text-transform:none}
+  .links a:hover{color:var(--ink)}
+</style>
+
+<script>
+  import { onPage } from '../lib/lifecycle';
+  import { init as initGlass, type Lines } from '../effects/liquid-glass';
+  import { init as initMagnetic } from '../effects/magnetic';
+  import { headlineScale } from '../config/effects';
+  onPage((doc) => {
+    const el = doc.getElementById('contacto');
+    if (!el || !el.dataset.lines) return;
+    const glass = initGlass(el, { lines: JSON.parse(el.dataset.lines) as Lines, label: el.dataset.label!, scale: headlineScale.cta, explode: false });
+    const mag = initMagnetic(el.querySelector<HTMLElement>('[data-magnetic]')!);
+    return [glass.destroy, mag.destroy];
+  });
+</script>

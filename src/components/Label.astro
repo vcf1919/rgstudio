@@ -1,0 +1,5 @@
+---
+interface Props { left: string; right?: string }
+const { left, right } = Astro.props;
+---
+<div class="label mono"><span>{left}</span>{right && <span>{right}</span>}</div>

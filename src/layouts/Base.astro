@@ -1,0 +1,33 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import Seo from '../components/Seo.astro';
+import JsonLd from '../components/JsonLd.astro';
+import Cursor from '../components/Cursor.astro';
+import '../styles/fonts.css';
+import '../styles/tokens.css';
+import '../styles/base.css';
+interface Props { title?: string; description?: string; image?: string; noindex?: boolean; jsonld?: boolean }
+const { jsonld = true, ...seo } = Astro.props;
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" href="/fonts/host-grotesk-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <Seo {...seo} />
+    {jsonld && <JsonLd />}
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="skip" href="#main">Saltar al contenido</a>
+    <slot />
+    <Cursor />
+    <script>
+      import { onPage } from '../lib/lifecycle';
+      import { startSmoothScroll, stopSmoothScroll } from '../lib/scroll';
+      onPage(() => { startSmoothScroll(); return stopSmoothScroll; });
+    </script>
+  </body>
+</html>

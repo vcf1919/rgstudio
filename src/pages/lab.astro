@@ -1,0 +1,188 @@
+---
+import Base from '../layouts/Base.astro';
+import { glass as g } from '../config/effects';
+import { site } from '../lib/site';
+
+type S = { key: keyof typeof g; label: string; min: number; max: number; step: number };
+const groups: { title: string; sliders: S[] }[] = [
+  { title: 'Gota', sliders: [
+    { key: 'radiusDesktop', label: 'Radio escritorio', min: 0.05, max: 0.3, step: 0.005 },
+    { key: 'radiusMobile', label: 'Radio móvil', min: 0.05, max: 0.35, step: 0.005 },
+    { key: 'follow', label: 'Inercia (seguimiento)', min: 0.01, max: 0.4, step: 0.005 },
+    { key: 'trail', label: 'Estela', min: 0.05, max: 0.6, step: 0.01 },
+    { key: 'drops', label: 'Gotas de la explosión', min: 0, max: 60, step: 1 },
+  ]},
+  { title: 'Óptica', sliders: [
+    { key: 'refraction', label: 'Refracción', min: 0, max: 1.2, step: 0.01 },
+    { key: 'aberration', label: 'Aberración', min: 0, max: 4, step: 0.05 },
+    { key: 'specular', label: 'Brillo especular', min: 0, max: 2, step: 0.01 },
+    { key: 'rim', label: 'Brillo del borde', min: 0, max: 1, step: 0.01 },
+  ]},
+  { title: 'Tiempo', sliders: [
+    { key: 'waveSpeed', label: 'Velocidad de la onda', min: 0.3, max: 3, step: 0.05 },
+    { key: 'autoSpeed', label: 'Velocidad modo automático', min: 0, max: 4, step: 0.05 },
+    { key: 'idleMs', label: 'Espera modo automático (ms)', min: 0, max: 10000, step: 100 },
+  ]},
+];
+---
+<Base title="Lab" noindex jsonld={false}>
+  <main id="main" class="lab">
+    <section class="stage" id="labStage" data-cursor="glass" data-lines={JSON.stringify(site.hero.lines)} data-label={site.hero.label}>
+      <h1 class="sr">Lab del cristal líquido</h1>
+      <canvas class="glcv" aria-hidden="true"></canvas>
+      <span class="fps mono" id="fps">— fps</span>
+    </section>
+
+    <aside class="panel" id="panel" aria-label="Controles del efecto">
+      <div class="head">
+        <span class="mono">(Lab) Cristal líquido</span>
+        <button class="mono tog" type="button" aria-expanded="true" aria-controls="panelBody" id="tog">Ocultar</button>
+      </div>
+      <div class="body" id="panelBody">
+        <fieldset>
+          <legend class="mono">Simular scroll</legend>
+          <label class="row"><span>hp</span><input type="range" id="hp" min="0" max="1" step="0.001" value="0" /><output id="hpOut">0.000</output></label>
+          <div class="btns">
+            <button type="button" id="play" class="mono">▶ Reproducir 0 → 1</button>
+            <button type="button" id="reset" class="mono">Reset</button>
+          </div>
+        </fieldset>
+        {groups.map((gr) => (
+          <fieldset>
+            <legend class="mono">{gr.title}</legend>
+            {gr.sliders.map((s) => (
+              <label class="row">
+                <span>{s.label}</span>
+                <input type="range" data-key={s.key} min={s.min} max={s.max} step={s.step} value={g[s.key]} />
+                <output>{g[s.key]}</output>
+              </label>
+            ))}
+          </fieldset>
+        ))}
+        <div class="btns">
+          <button type="button" id="copy" class="mono">Copiar config</button>
+          <button type="button" id="defaults" class="mono">Valores por defecto</button>
+        </div>
+        <p class="mono note" id="copied" role="status"></p>
+      </div>
+    </aside>
+  </main>
+</Base>
+
+<style>
+  .lab{position:relative}
+  .stage{position:relative;height:100svh;min-height:560px;overflow:hidden;touch-action:pan-y}
+  .fps{position:absolute;left:var(--pad);top:var(--pad);z-index:2;color:var(--mute)}
+  .panel{position:fixed;right:12px;top:12px;bottom:12px;width:min(340px,calc(100vw - 24px));z-index:10;background:rgba(251,250,247,.92);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;overflow:hidden}
+  .panel.closed{bottom:auto}
+  .panel.closed .body{display:none}
+  .head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .body{overflow:auto;padding:4px 14px 14px;overscroll-behavior:contain}
+  fieldset{border:0;border-bottom:1px solid var(--line);padding:12px 0}
+  legend{color:var(--mute);padding:12px 0 6px;float:left;width:100%}
+  .row{display:grid;grid-template-columns:1fr 54px;gap:2px 10px;align-items:center;font-size:13px;padding:5px 0;clear:both}
+  .row span{grid-column:1/-1;color:var(--ink)}
+  .row input{width:100%;accent-color:var(--ink)}
+  .row output{font:11px var(--mono);text-align:right;color:var(--mute)}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;padding-top:12px}
+  button{background:none;border:1px solid var(--ink);border-radius:999px;padding:8px 12px;cursor:pointer;color:var(--ink)}
+  button:hover{background:var(--ink);color:var(--bg)}
+  .tog{border-color:var(--line);padding:6px 10px}
+  .note{color:var(--mute);min-height:1em;padding-top:10px}
+  @media(max-width:700px){.panel{top:auto;height:52svh}.panel.closed{height:auto}}
+</style>
+
+<script>
+  import { onPage } from '../lib/lifecycle';
+  import { init as initGlass, type GlassInstance, type Lines } from '../effects/liquid-glass';
+  import { progressToGlass } from '../effects/hero-scroll';
+  import { glass as defaults, headlineScale, type GlassParams } from '../config/effects';
+
+  onPage((doc) => {
+    const stage = doc.getElementById('labStage');
+    if (!stage) return;
+    const lines = JSON.parse(stage.dataset.lines!) as Lines;
+    const label = stage.dataset.label!;
+    const params: GlassParams = { ...defaults };
+    let glass: GlassInstance;
+    let hp = 0;
+
+    const mount = () => {
+      glass = initGlass(stage, { lines, label, scale: headlineScale.hero, explode: true, params, forceMotion: true });
+      // the instance copies params: point the shared object at it so sliders stay live
+      Object.assign(glass.params, params);
+      apply();
+    };
+    const rebuild = () => {
+      // a lost WebGL context can't be reused: swap in a fresh canvas
+      glass.destroy();
+      const old = stage.querySelector('canvas')!;
+      const fresh = old.cloneNode() as HTMLCanvasElement;
+      fresh.style.cssText = '';
+      old.replaceWith(fresh);
+      mount();
+    };
+    const apply = () => { const v = progressToGlass(hp); glass.charge = v.charge; glass.ex = v.ex; };
+    mount();
+
+    /* sliders */
+    const fmt = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(3).replace(/0+$/, ''));
+    const inputs = [...doc.querySelectorAll<HTMLInputElement>('input[data-key]')];
+    const sync = (inp: HTMLInputElement) => { (inp.nextElementSibling as HTMLOutputElement).value = fmt(+inp.value); };
+    inputs.forEach((inp) => inp.addEventListener('input', () => {
+      const k = inp.dataset.key as keyof GlassParams;
+      params[k] = +inp.value;
+      sync(inp);
+      if (k === 'drops') rebuild(); else glass.params[k] = +inp.value;
+    }));
+
+    /* simulated scroll */
+    const hpIn = doc.getElementById('hp') as HTMLInputElement;
+    const hpOut = doc.getElementById('hpOut') as HTMLOutputElement;
+    let anim = 0;
+    const setHp = (v: number) => { hp = v; hpIn.value = String(v); hpOut.value = v.toFixed(3); apply(); };
+    hpIn.addEventListener('input', () => { cancelAnimationFrame(anim); setHp(+hpIn.value); });
+    doc.getElementById('play')!.addEventListener('click', () => {
+      cancelAnimationFrame(anim);
+      const t0 = performance.now(), dur = 3600;
+      const step = (now: number) => { const k = Math.min(1, (now - t0) / dur); setHp(k); if (k < 1) anim = requestAnimationFrame(step); };
+      anim = requestAnimationFrame(step);
+    });
+    doc.getElementById('reset')!.addEventListener('click', () => { cancelAnimationFrame(anim); setHp(0); });
+
+    /* copy / defaults */
+    const note = doc.getElementById('copied')!;
+    doc.getElementById('copy')!.addEventListener('click', async () => {
+      const json = JSON.stringify(params, null, 2);
+      try { await navigator.clipboard.writeText(json); note.textContent = 'Copiado. Pégalo en src/config/effects.ts'; }
+      catch { note.textContent = 'No se pudo copiar: mira la consola'; console.log(json); }
+    });
+    doc.getElementById('defaults')!.addEventListener('click', () => {
+      const dropsChanged = params.drops !== defaults.drops;
+      Object.assign(params, defaults);
+      inputs.forEach((inp) => { inp.value = String(params[inp.dataset.key as keyof GlassParams]); sync(inp); });
+      if (dropsChanged) rebuild(); else Object.assign(glass.params, params);
+    });
+
+    /* panel toggle */
+    const panel = doc.getElementById('panel')!, tog = doc.getElementById('tog')!;
+    tog.addEventListener('click', () => {
+      const closed = panel.classList.toggle('closed');
+      tog.setAttribute('aria-expanded', String(!closed));
+      tog.textContent = closed ? 'Mostrar' : 'Ocultar';
+    });
+
+    /* FPS */
+    const fpsEl = doc.getElementById('fps')!;
+    let frames = 0, last = performance.now(), fr = 0;
+    const tick = (now: number) => {
+      frames++;
+      if (now - last >= 500) { fpsEl.textContent = `${Math.round((frames * 1000) / (now - last))} fps`; frames = 0; last = now; }
+      fr = requestAnimationFrame(tick);
+    };
+    fr = requestAnimationFrame(tick);
+
+    return () => { cancelAnimationFrame(fr); cancelAnimationFrame(anim); glass.destroy(); };
+  });
+</script>

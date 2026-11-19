@@ -1,0 +1,35 @@
+---
+import { site } from '../lib/site';
+const areas = site.areaServed.map((name) => ({ '@type': 'Place', name }));
+const data = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'ProfessionalService',
+      '@id': `${site.url}/#studio`,
+      name: site.brand,
+      url: site.url,
+      description: site.description,
+      email: site.email,
+      telephone: `+${site.whatsapp.number}`,
+      image: `${site.url}/og.png`,
+      address: { '@type': 'PostalAddress', addressLocality: site.location, addressRegion: site.region, addressCountry: 'ES' },
+      areaServed: areas,
+      sameAs: [site.instagram.url],
+      founder: { '@id': `${site.url}/#person` },
+      knowsLanguage: ['es', 'ca'],
+    },
+    {
+      '@type': 'Person',
+      '@id': `${site.url}/#person`,
+      name: site.name,
+      jobTitle: 'Diseñador y desarrollador web',
+      url: site.url,
+      email: site.email,
+      worksFor: { '@id': `${site.url}/#studio` },
+      sameAs: [site.instagram.url],
+    },
+  ],
+};
+---
+<script type="application/ld+json" set:html={JSON.stringify(data)} />

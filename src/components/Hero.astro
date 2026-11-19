@@ -1,0 +1,62 @@
+---
+import { site } from '../lib/site';
+const { hero } = site;
+---
+<div class="hero-wrap" id="heroWrap">
+  <section class="hero" id="hero" data-cursor="glass" data-lines={JSON.stringify(hero.lines)} data-label={hero.label}>
+    <h1 class="sr">{hero.h1}</h1>
+    <canvas class="glcv" aria-hidden="true"></canvas>
+    <a class="corner tl logo" href="/" aria-label={`${site.brand}, inicio`}>{site.brand}<i aria-hidden="true"></i></a>
+    <a class="corner tr pill" href="#contacto">{hero.cta}</a>
+    <span class="corner bl mono"><span data-fade>{hero.tagline}</span></span>
+    <span class="corner br mono" aria-hidden="true"><span data-fade><span class="h-fine">{hero.hintPointer}</span><span class="h-touch">{hero.hintTouch}</span></span></span>
+    <div class="progress mono" aria-hidden="true"><span>Boceto</span><b><i data-bar></i></b><span>Web</span></div>
+  </section>
+</div>
+
+<style>
+  .hero-wrap{position:relative;height:280svh}
+  .hero{position:sticky;top:0;height:100svh;min-height:560px;overflow:hidden;touch-action:pan-y}
+  :global(.glcv){position:absolute;inset:0;width:100%;height:100%;display:block}
+  .corner{position:absolute;z-index:2;display:flex;gap:8px;align-items:center;opacity:0;animation:fade 1s var(--ease) 1.2s forwards}
+  .tl{top:var(--pad);left:var(--pad)} .tr{top:var(--pad);right:var(--pad)}
+  .bl{bottom:var(--pad);left:var(--pad);color:var(--mute)} .br{bottom:var(--pad);right:var(--pad);color:var(--mute)}
+  .logo{font-size:16px;font-weight:600;letter-spacing:-.03em}
+  .logo i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--acc);margin-left:2px}
+  .pill{font-size:14px;font-weight:500;border:1px solid var(--ink);border-radius:999px;padding:9px 16px;transition:background .35s var(--ease),color .35s var(--ease)}
+  .pill:hover{background:var(--ink);color:var(--bg)}
+  .progress{position:absolute;left:50%;bottom:var(--pad);transform:translateX(-50%);z-index:2;display:flex;align-items:center;gap:10px;color:var(--mute);opacity:0;animation:fade 1s var(--ease) 1.6s forwards}
+  .progress b{display:block;width:90px;height:1px;background:var(--line);position:relative;overflow:hidden}
+  .progress b i{position:absolute;inset:0;background:var(--ink);transform-origin:left;transform:scaleX(0)}
+  /* the corners fade in with a CSS animation; the scroll fade goes on an inner span so it isn't overridden */
+  [data-fade]{transition:opacity .2s linear}
+  .h-touch{display:none}
+  @media (pointer:coarse){.h-touch{display:inline}.h-fine{display:none}}
+  @media(max-width:700px){.progress{display:none}.bl{display:none}}
+  @media (prefers-reduced-motion:reduce){.hero-wrap{height:100svh}}
+</style>
+
+<script>
+  import { onPage } from '../lib/lifecycle';
+  import { init as initGlass, type Lines } from '../effects/liquid-glass';
+  import { init as initHeroScroll } from '../effects/hero-scroll';
+  import { headlineScale } from '../config/effects';
+
+  onPage((doc) => {
+    const wrap = doc.getElementById('heroWrap');
+    const hero = doc.getElementById('hero');
+    if (!wrap || !hero) return;
+    const glass = initGlass(hero, {
+      lines: JSON.parse(hero.dataset.lines!) as Lines,
+      label: hero.dataset.label!,
+      scale: headlineScale.hero,
+      explode: true,
+    });
+    const scroll = initHeroScroll(wrap, {
+      glass,
+      bar: hero.querySelector<HTMLElement>('[data-bar]'),
+      fade: [...hero.querySelectorAll<HTMLElement>('[data-fade]')],
+    });
+    return [scroll.destroy, glass.destroy];
+  });
+</script>

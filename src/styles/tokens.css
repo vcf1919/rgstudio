@@ -1,0 +1,10 @@
+:root{
+  /* colour */
+  --bg:#F1EFEA; --ink:#111110; --mute:#6E6A62; --line:#DDD9D1; --acc:#FF4D12;
+  --bg-in:#EAE7E0; --faint:#D3CFC6;
+  /* type */
+  --sans:"Host Grotesk", system-ui, sans-serif; --mono:"JetBrains Mono", ui-monospace, monospace;
+  --track-d:-.055em;
+  /* motion & space */
+  --ease:cubic-bezier(.22,1,.36,1); --pad:clamp(18px,3.4vw,44px);
+}

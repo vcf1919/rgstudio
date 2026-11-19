@@ -1,0 +1,32 @@
+{
+  "name": "Rubén G.",
+  "brand": "rgdev.studio",
+  "url": "https://rgdev.studio",
+  "description": "Diseño y desarrollo web para clínicas, centros de belleza y comercios de Catarroja y l'Horta Sud. Webs rápidas, con diseño propio y pensadas para que tus clientes te escriban.",
+  "location": "Catarroja",
+  "region": "Valencia",
+  "areaServed": ["Catarroja", "l'Horta Sud", "Valencia"],
+  "whatsapp": {
+    "number": "34600000000",
+    "message": "Hola, vengo de rgdev.studio y me gustaría hablar sobre una web para mi negocio."
+  },
+  "email": "rubeng.seo@gmail.com",
+  "instagram": { "handle": "@rgdev.studio", "url": "https://www.instagram.com/rgdev.studio/" },
+  "hero": {
+    "h1": "De boceto a web. Diseño y desarrollo web en Catarroja, Valencia.",
+    "lines": [[{ "t": "De boceto" }], [{ "t": "a web.", "acc": true }]],
+    "label": "H1 / HOST GROTESK {px}PX",
+    "tagline": "Diseño y desarrollo web — Catarroja",
+    "hintPointer": "Mueve el cursor · clic",
+    "hintTouch": "Toca y arrastra",
+    "cta": "Hablemos"
+  },
+  "statement": "Hago webs para negocios que quieren *notarse. Diseño propio, código limpio y clientes que te *escriben.",
+  "contact": {
+    "h2": "Hablemos.",
+    "lines": [[{ "t": "Hablemos" }, { "t": ".", "acc": true }]],
+    "label": "H2 / CTA → WHATSAPP",
+    "note": "Respondo en el día",
+    "button": "WhatsApp"
+  }
+}

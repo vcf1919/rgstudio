@@ -1,0 +1,14 @@
+<div class="cur" id="cur" aria-hidden="true" transition:persist></div>
+<style>
+  .cur{position:fixed;left:0;top:0;z-index:30;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--acc);pointer-events:none;opacity:0;transition:opacity .3s,width .3s var(--ease),height .3s var(--ease),margin .3s var(--ease)}
+  .cur:global(.big){width:56px;height:56px;margin:-28px 0 0 -28px;opacity:.25!important}
+  @media (pointer:coarse){.cur{display:none}}
+</style>
+<script>
+  import { onPage } from '../lib/lifecycle';
+  import { init } from '../effects/cursor';
+  onPage((doc) => {
+    const el = doc.getElementById('cur');
+    if (el) return init(el).destroy;
+  });
+</script>
